@@ -1,11 +1,13 @@
 const express = require('express')
 const CORS = require('cors')
+require('dotenv').config()
 
 //Authorizations and password 
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
-const JWTSecret = 'husiahuishuai'
+const JWTSecret = process.env.AUTH_SECRET
+
 
 
 const app = express()
@@ -104,11 +106,17 @@ app.post('/games', Auth, (req, res) => {
 
 //TODOS OS JOGOS
 app.get('/games', Auth, (req, res) => {
+    const { id, email } = req.loggedUser
+    const token = req.token
     Game.findAll()
         .then((games) => {
             if (games != undefined) {
                 res.statusCode = status.sucess
-                res.json(games)
+                res.json({
+                    email,
+                    token,
+                    games
+                })
             } else {
                 res.statusCode = status.notFound
                 res.send('Nenhum jogo encontrado')
@@ -165,7 +173,7 @@ app.post('/auth', (req, res) => {
                     jwt
                         .sign({
                                 id: user.id,
-                                name: user.email,
+                                email: user.email,
                             },
                             JWTSecret, {
                                 expiresIn: '2h'
@@ -180,11 +188,10 @@ app.post('/auth', (req, res) => {
                                     res.statusCode = status.sucess
                                     res.json({
                                         user: {
-                                            id: user.id,
+                                            name: user.name,
                                             email: user.email,
                                             token: token
                                         }
-
                                     })
                                 }
                             })

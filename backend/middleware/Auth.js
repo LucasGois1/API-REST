@@ -1,4 +1,17 @@
+const jwt = require('jsonwebtoken')
+require('dotenv').config()
+
+const status = {
+    notFound: 404,
+    invalidArgument: 400,
+    created: 201,
+    sucess: 200,
+    internalProblems: 500,
+    notAuthtorized: 401
+}
+
 const Auth = (req, res, next) => {
+    const JWTSecret = process.env.AUTH_SECRET
     const authToken = req.headers['authorization']
     if (authToken != undefined) {
         const [bearer, token] = authToken.split(' ')
@@ -10,6 +23,7 @@ const Auth = (req, res, next) => {
                 })
             } else {
                 req.token = token
+                console.log(data)
                 req.loggedUser = {
                     ...data
                 }
